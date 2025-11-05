@@ -12,7 +12,17 @@ class _PostScreenState extends State<PostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Posts')),
+      appBar: AppBar(
+        title: const Text('Posts', style: TextStyle()),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.dark_mode),
+            onPressed: () {
+              // Implement refresh functionality here
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           PostCard(
