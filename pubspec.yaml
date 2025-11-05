@@ -39,6 +39,8 @@ dependencies:
   json_annotation: ^4.9.0 # JSON serialization annotations
   bloc: ^9.1.0 # State management
   flutter_bloc: ^9.1.1 # Flutter widgets for Bloc
+  hydrated_bloc: ^10.1.1 # Persistent Bloc state
+  path_provider: ^2.1.5 # File system paths
   equatable: ^2.0.7 # Value equality
   google_fonts: ^6.3.2 # Google Fonts
   go_router: ^16.3.0 # Routing

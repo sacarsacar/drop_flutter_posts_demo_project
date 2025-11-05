@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
+import 'core/bloc/theme_bloc.dart';
 import 'flavors.dart';
 
 void main() async {
@@ -11,6 +15,12 @@ void main() async {
   await dotenv.load();
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  // Initialize HydratedBloc storage
+  final directory = await getApplicationDocumentsDirectory();
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: HydratedStorageDirectory(directory.path),
+  );
 
   // setting up the flavor :
   const String flavorName = String.fromEnvironment(
@@ -23,7 +33,7 @@ void main() async {
     orElse: () => Flavor.dev,
   );
 
-  debugPrint(' Running in ${F.name} mode');
+  debugPrint('🚀 Running in ${F.name} mode');
 
-  runApp(const MyApp());
+  runApp(BlocProvider(create: (_) => ThemeBloc(), child: const MyApp()));
 }
