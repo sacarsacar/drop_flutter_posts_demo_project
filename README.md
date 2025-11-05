@@ -11,3 +11,31 @@ Dot Env: : BaseUrl=https://jsonplaceholder.typicode.com/posts
 flutter run --flavor dev # Development flavor
 flutter run --flavor staging # Staging flavor
 flutter run --flavor prod # Production flavor
+
+inside .vscode create a file lunch.json and paste this :
+{
+"version": "0.2.0",
+"configurations": [
+{
+"name": "Dev",
+"request": "launch",
+"type": "dart",
+"program": "lib/main.dart",
+"args": ["--flavor", "dev", "--dart-define=FLAVOR=dev"]
+},
+{
+"name": "Staging",
+"request": "launch",
+"type": "dart",
+"program": "lib/main.dart",
+"args": ["--flavor", "staging", "--dart-define=FLAVOR=staging"]
+},
+{
+"name": "Prod",
+"request": "launch",
+"type": "dart",
+"program": "lib/main.dart",
+"args": ["--flavor", "prod", "--dart-define=FLAVOR=prod"]
+}
+]
+}
