@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:posts_demo_project/core/injection/injection.dart';
 
 import 'app.dart';
 import 'core/bloc/theme_bloc.dart';
@@ -21,6 +22,9 @@ void main() async {
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: HydratedStorageDirectory(directory.path),
   );
+
+  // Configuring dependency injection
+  await configureDependencies();
 
   // setting up the flavor :
   const String flavorName = String.fromEnvironment(
