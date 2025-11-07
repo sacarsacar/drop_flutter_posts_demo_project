@@ -13,6 +13,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../features/posts/data/datasources/post_api_client.dart' as _i170;
 import '../../features/posts/data/repositories_impl/post_repositories_impl.dart'
     as _i590;
 import '../../features/posts/domain/posts_repositories.dart' as _i1029;
@@ -28,8 +29,9 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final injectionModule = _$InjectionModule();
     gh.lazySingleton<_i361.Dio>(() => injectionModule.dio);
+    gh.lazySingleton<_i170.PostApiClient>(() => injectionModule.postApiClient);
     gh.lazySingleton<_i1029.PostsRepositories>(
-      () => _i590.PostRepositoriesImpl(gh<_i361.Dio>()),
+      () => _i590.PostRepositoriesImpl(gh<_i170.PostApiClient>()),
     );
     gh.factory<_i19.PostsBloc>(
       () => _i19.PostsBloc(gh<_i1029.PostsRepositories>()),
