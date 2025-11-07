@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:posts_demo_project/core/theme.dart';
 import 'package:posts_demo_project/core/utils/responsive_query.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PostCard extends StatelessWidget {
   final String title;
@@ -35,19 +36,20 @@ class PostCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             onTap: () {},
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    bottomLeft: Radius.circular(16),
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
                   ),
-                  child: Image.network(
-                    imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
                     width: 120,
                     height: 120,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
+                    errorWidget: (context, url, error) => Container(
                       width: 120,
                       height: 120,
                       color: Colors.grey[300],
@@ -87,7 +89,12 @@ class PostCard extends StatelessWidget {
                                   backgroundColor: Colors.grey[300],
                                   child: Text(
                                     username[0].toUpperCase(),
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: ThemeData.light()
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 6),

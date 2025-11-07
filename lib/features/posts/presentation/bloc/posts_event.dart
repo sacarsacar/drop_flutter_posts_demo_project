@@ -8,3 +8,12 @@ abstract class PostsEvent extends Equatable {
 }
 
 class FetchPosts extends PostsEvent {}
+
+//  for like post event:
+class LikePost extends PostsEvent {
+  final int postId;
+  const LikePost(this.postId);
+
+  @override
+  List<Object> get props => [postId];
+}

@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:posts_demo_project/core/bloc/theme_bloc.dart';
 import 'package:posts_demo_project/core/injection/injection.dart';
 import 'package:posts_demo_project/core/theme.dart';
-import 'package:posts_demo_project/core/utils/loader.dart';
 import 'package:posts_demo_project/features/posts/data/models/posts_model.dart';
 import 'package:posts_demo_project/features/posts/presentation/bloc/posts_bloc.dart';
 import 'package:posts_demo_project/features/posts/presentation/widgets/post_card_widget.dart';
 import 'package:posts_demo_project/core/utils/responsive_query.dart';
+import 'package:posts_demo_project/features/posts/presentation/widgets/shimmer_widget.dart';
 
 class PostScreen extends StatefulWidget {
   const PostScreen({super.key});
@@ -42,7 +42,12 @@ class _PostScreenState extends State<PostScreen> {
               builder: (context, state) {
                 // loading state:
                 if (state is PostsLoading) {
-                  return const Center(child: Loader());
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: 6,
+                    itemBuilder: (context, index) => const ShimmerPostCard(),
+                  );
+                  // const Center(child: Loader());
                 }
                 // post loaded state:
                 if (state is PostsLoaded) {
@@ -65,14 +70,21 @@ class _PostScreenState extends State<PostScreen> {
                               itemCount: posts.length,
                               itemBuilder: (context, index) {
                                 final post = posts[index];
+                                final isLiked = state.likedIds.contains(
+                                  post.id,
+                                );
                                 return PostCard(
                                   title: post.title,
                                   body: post.body,
                                   username: "Sakar Chaulagain",
                                   imageUrl:
                                       'https://picsum.photos/id/${post.id}/200/200',
-                                  liked: false,
-                                  onLikeToggle: () {},
+                                  liked: isLiked,
+                                  onLikeToggle: () {
+                                    context.read<PostsBloc>().add(
+                                      LikePost(post.id),
+                                    );
+                                  },
                                 );
                               },
                             ),
