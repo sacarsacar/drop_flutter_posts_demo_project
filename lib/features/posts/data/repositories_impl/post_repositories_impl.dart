@@ -3,24 +3,29 @@ import 'package:injectable/injectable.dart';
 import 'package:posts_demo_project/core/constants/api_routes.dart';
 import 'package:posts_demo_project/features/posts/data/models/posts_model.dart';
 import 'package:posts_demo_project/features/posts/domain/posts_repositories.dart';
+import 'package:posts_demo_project/features/posts/data/datasources/post_api_client.dart';
 
 @LazySingleton(as: PostsRepositories)
 class PostRepositoriesImpl implements PostsRepositories {
-  final Dio dio;
+  final PostApiClient client;
 
-  PostRepositoriesImpl(this.dio);
+  PostRepositoriesImpl(this.client);
 
   @override
   Future<List<Post>> fetchPosts() async {
-    try {
-      final response = await dio.get(ApiRoutes.baseUrl);
+    final base = ApiRoutes.baseUrl;
+    if (base.isEmpty) {
+      throw Exception('BASE_URL is empty.');
+    }
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((e) => Post.fromJson(e)).toList();
-      } else {
-        throw Exception('Failed to load posts: ${response.statusCode}');
-      }
+    try {
+      // Use generated Retrofit client
+      final posts = await client.fetchPosts();
+      return posts;
+    } on DioException catch (dioErr) {
+      throw Exception(
+        'Failed to load posts: ${dioErr.response?.statusCode ?? ''} ${dioErr.message}',
+      );
     } catch (e) {
       throw Exception('Failed to load posts: $e');
     }

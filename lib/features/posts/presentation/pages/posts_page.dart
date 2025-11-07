@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:posts_demo_project/core/bloc/theme_bloc.dart';
 import 'package:posts_demo_project/core/injection/injection.dart';
+import 'package:posts_demo_project/core/theme.dart';
 import 'package:posts_demo_project/core/utils/loader.dart';
 import 'package:posts_demo_project/features/posts/data/models/posts_model.dart';
 import 'package:posts_demo_project/features/posts/presentation/bloc/posts_bloc.dart';
 import 'package:posts_demo_project/features/posts/presentation/widgets/post_card_widget.dart';
+import 'package:posts_demo_project/core/utils/responsive_query.dart';
 
 class PostScreen extends StatefulWidget {
   const PostScreen({super.key});
@@ -50,21 +52,33 @@ class _PostScreenState extends State<PostScreen> {
                     onRefresh: () async {
                       context.read<PostsBloc>().add(FetchPosts());
                     },
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(12),
-                      itemCount: posts.length,
-                      itemBuilder: (context, index) {
-                        final post = posts[index];
-                        return PostCard(
-                          title: post.title,
-                          body: post.body,
-                          username: "Sakar Chaulagain",
-                          imageUrl:
-                              'https://picsum.photos/id/${post.id}/200/200',
-                          liked: false,
-                          onLikeToggle: () {},
-                        );
-                      },
+                    child: Center(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final screen = ScreenHelper(context);
+                          return ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: screen.maxWidth.toDouble(),
+                            ),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(12),
+                              itemCount: posts.length,
+                              itemBuilder: (context, index) {
+                                final post = posts[index];
+                                return PostCard(
+                                  title: post.title,
+                                  body: post.body,
+                                  username: "Sakar Chaulagain",
+                                  imageUrl:
+                                      'https://picsum.photos/id/${post.id}/200/200',
+                                  liked: false,
+                                  onLikeToggle: () {},
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   );
                 }
@@ -74,7 +88,7 @@ class _PostScreenState extends State<PostScreen> {
                   return Center(
                     child: Text(
                       state.message,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: AppColors.red),
                     ),
                   );
                 }

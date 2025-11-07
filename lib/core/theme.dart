@@ -16,6 +16,10 @@ class AppColors {
       Theme.of(context).colorScheme.onPrimary;
   static Color onSurface(BuildContext context) =>
       Theme.of(context).colorScheme.onSurface;
+
+  // Static colors:
+  static const Color red = Colors.red;
+  
 }
 
 class AppTheme {
