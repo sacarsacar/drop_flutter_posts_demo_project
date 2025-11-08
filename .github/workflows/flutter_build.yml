@@ -81,7 +81,7 @@ jobs:
       # 1️⃣2️⃣ Upload to GitHub Release (only when a new release tag is created)
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        # if: startsWith(github.ref, 'refs/tags/') 
         with:
           files: |
             build/app/outputs/flutter-apk/app-dev-release.apk
