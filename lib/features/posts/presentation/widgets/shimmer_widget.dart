@@ -1,3 +1,4 @@
+import 'package:posts_demo_project/core/theme.dart';
 import 'package:posts_demo_project/core/utils/responsive_query.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -7,16 +8,15 @@ class ShimmerPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-      highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+      baseColor: AppColors.shimmerBase(context),
+      highlightColor: AppColors.shimmerHighlight(context),
+      period: Duration(milliseconds: 1500),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final screen = ScreenHelper(context);
           return Card(
-            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            color: AppColors.transparent,
             elevation: 0,
             margin: const EdgeInsets.only(bottom: 16),
             shape: RoundedRectangleBorder(
@@ -34,7 +34,7 @@ class ShimmerPostCard extends StatelessWidget {
                   child: Container(
                     width: 100,
                     height: 100,
-                    color: isDark ? Colors.grey[700] : Colors.grey[300],
+                    color: AppColors.shimmerBase(context),
                   ),
                 ),
 
@@ -49,28 +49,31 @@ class ShimmerPostCard extends StatelessWidget {
                         Container(
                           height: 16,
                           width: double.infinity,
-                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: AppColors.shimmerBase(context),
                         ),
                         const SizedBox(height: 6),
                         // title line 2
                         Container(
                           height: 14,
                           width: MediaQuery.of(context).size.width * 0.5,
-                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: AppColors.shimmerBase(
+                            context,
+                            // ignore: deprecated_member_use
+                          ).withOpacity(0.9),
                         ),
                         const SizedBox(height: 10),
                         // body line 1
                         Container(
                           height: 12,
                           width: double.infinity,
-                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: AppColors.shimmerBase(context),
                         ),
                         const SizedBox(height: 6),
                         // body line 2
                         Container(
                           height: 12,
                           width: MediaQuery.of(context).size.width * 0.4,
-                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: AppColors.shimmerBase(context),
                         ),
                         SizedBox(height: screen.spacing.toDouble() - 6),
                         Row(
@@ -81,18 +84,16 @@ class ShimmerPostCard extends StatelessWidget {
                                 // avatar
                                 CircleAvatar(
                                   radius: 12,
-                                  backgroundColor: isDark
-                                      ? Colors.grey[700]
-                                      : Colors.grey[300],
+                                  backgroundColor: AppColors.shimmerBase(
+                                    context,
+                                  ),
                                 ),
                                 const SizedBox(width: 6),
                                 // username
                                 Container(
                                   height: 12,
                                   width: 90,
-                                  color: isDark
-                                      ? Colors.grey[700]
-                                      : Colors.grey[300],
+                                  color: AppColors.shimmerBase(context),
                                 ),
                               ],
                             ),
@@ -101,9 +102,7 @@ class ShimmerPostCard extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: isDark
-                                    ? Colors.grey[700]
-                                    : Colors.grey[300],
+                                color: AppColors.shimmerBase(context),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),

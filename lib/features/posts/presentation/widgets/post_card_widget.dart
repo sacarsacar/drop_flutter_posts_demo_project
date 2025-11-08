@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:posts_demo_project/core/theme.dart';
 import 'package:posts_demo_project/core/utils/responsive_query.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,43 +27,61 @@ class PostCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final screen = ScreenHelper(context);
+
+        // Using the provided maxHeight when available
+        final tileHeight = (constraints.maxHeight > 0)
+            ? constraints.maxHeight
+            : 200.0;
+
+        // setting image height to tile height
+        final imageHeight = tileHeight;
+
         return Card(
           elevation: 1,
-          margin: const EdgeInsets.only(bottom: 16),
+          margin: const EdgeInsets.only(bottom: 10),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             onTap: () {},
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // image section:
                 ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.r),
+                    bottomLeft: Radius.circular(20.r),
                   ),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => Container(
-                      width: 120,
-                      height: 120,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 40),
+                  child: SizedBox(
+                    width: screen.postcardimageWidth,
+                    height: imageHeight,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      width: screen.postcardimageWidth,
+                      height: imageHeight,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Container(
+                        width: screen.postcardimageWidth,
+                        height: imageHeight,
+                        color: AppColors.greymedium,
+                        child: Icon(Icons.broken_image, size: 40),
+                      ),
                     ),
                   ),
                 ),
+
+                // text section:
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(screen.paddingAllEdgeInsets),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
+                        // Title
                         Text(
                           title,
                           style: Theme.of(context).textTheme.titleMedium
@@ -70,57 +89,65 @@ class PostCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: screen.spacing.toDouble() - 10),
+
                         Text(
                           body,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: Colors.grey[700]),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: screen.spacing.toDouble() - 10),
+
+                        const Spacer(),
+
+                        // Footer row (avatar + username + like)
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor: Colors.grey[300],
-                                  child: Text(
-                                    username[0].toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: ThemeData.light()
-                                          .colorScheme
-                                          .onSurface,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 12.r,
+                                    backgroundColor: AppColors.greymedium,
+                                    child: Text(
+                                      username.isNotEmpty
+                                          ? username[0].toUpperCase()
+                                          : '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.blue,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  username,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(
-                                          red: 0.6,
-                                          green: 0.6,
-                                          blue: 0.6,
-                                        ),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      username,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: AppColors.grey,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-
                             IconButton(
+                              iconSize: 20,
+                              padding: EdgeInsets.all(
+                                screen.paddingAllEdgeInsets,
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
                               icon: Icon(
                                 liked ? Icons.favorite : Icons.favorite_border,
                                 color: liked
                                     ? AppColors.red
-                                    : Theme.of(context).colorScheme.outline,
+                                    : Theme.of(context).iconTheme.color,
                               ),
                               onPressed: onLikeToggle,
                             ),

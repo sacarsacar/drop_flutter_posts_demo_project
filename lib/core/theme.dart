@@ -19,7 +19,21 @@ class AppColors {
 
   // Static colors:
   static const Color red = Colors.red;
-  
+  static const Color green = Colors.green;
+  static const Color blue = Colors.blue;
+  static const Color transparent = Colors.transparent;
+  static Color greymedium = Colors.grey[300]!;
+  static const Color grey = Colors.grey;
+  static Color greydark = Colors.grey[700]!;
+
+  // Helper methods for shimmer colors to avoid repetition
+  static Color shimmerBase(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? greydark : greymedium;
+
+  static Color shimmerHighlight(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? Colors.grey[700]!
+      : Colors.grey[100]!;
 }
 
 class AppTheme {
@@ -28,7 +42,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.blue,
+        seedColor: AppColors.blue,
         brightness: Brightness.light,
       ),
       textTheme: GoogleFonts.latoTextTheme(ThemeData.light().textTheme),
@@ -40,7 +54,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.blue,
+        seedColor: AppColors.blue,
         brightness: Brightness.dark,
       ),
       textTheme: GoogleFonts.latoTextTheme(ThemeData.dark().textTheme),

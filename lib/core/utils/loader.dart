@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:posts_demo_project/core/theme.dart';
 
 class Loader extends StatelessWidget {
   const Loader({super.key});
@@ -12,12 +13,7 @@ class Loader extends StatelessWidget {
         width: 80,
         child: LoadingIndicator(
           indicatorType: Indicator.ballSpinFadeLoader,
-          colors: [
-            Theme.of(context).primaryColor,
-            Colors.red,
-            Colors.green,
-            Colors.blue,
-          ],
+          colors: [AppColors.red, AppColors.blue, AppColors.green],
           strokeWidth: 2,
           backgroundColor: Colors.transparent,
           pathBackgroundColor: Colors.transparent,

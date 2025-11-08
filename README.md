@@ -12,7 +12,7 @@ flutter run --flavor dev # Development flavor
 flutter run --flavor staging # Staging flavor
 flutter run --flavor prod # Production flavor
 
-inside .vscode create a file lunch.json and paste this :
+inside .vscode create a file launch.json and paste this :
 {
 "version": "0.2.0",
 "configurations": [
@@ -39,3 +39,7 @@ inside .vscode create a file lunch.json and paste this :
 }
 ]
 }
+
+
+
+build runner command : flutter pub run build_runner watch --delete-conflicting-outputs

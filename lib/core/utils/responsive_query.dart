@@ -11,9 +11,11 @@ class ScreenHelper {
   bool get isTablet => screenWidth >= 600 && screenWidth < 1200;
   bool get isDesktop => screenWidth >= 1200;
 
-  double get paddingHorizontal => isMobile ? 20.w : (isTablet ? 40 : 60);
-  double get paddingVertical => 20.h;
+  double get paddingAllEdgeInsets => isMobile ? 10.w : (isTablet ? 10 : 10);
   double get titleFontSize => isMobile ? 24.sp : (isTablet ? 28 : 30);
-  double get spacing => isMobile ? 20.h : (isTablet ? 30 : 30);
+  double get spacing => isMobile ? 15.h : (isTablet ? 15 : 15);
   double get maxWidth => isMobile ? double.infinity : (isTablet ? 500 : 600);
+
+  //  post cards query:
+  double get postcardimageWidth => isMobile ? 120.w : (isTablet ? 130 : 140);
 }

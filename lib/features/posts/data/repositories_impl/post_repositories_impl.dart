@@ -19,7 +19,7 @@ class PostRepositoriesImpl implements PostsRepositories {
     }
 
     try {
-      // Use generated Retrofit client
+      // Using generated Retrofit client
       final posts = await client.fetchPosts();
       return posts;
     } on DioException catch (dioErr) {

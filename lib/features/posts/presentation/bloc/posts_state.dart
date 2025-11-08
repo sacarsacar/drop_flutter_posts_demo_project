@@ -14,11 +14,16 @@ class PostsLoading extends PostsState {}
 class PostsLoaded extends PostsState {
   final List<Post> posts;
   final Set<int> likedIds;
+  final bool isRefreshing;
 
-  const PostsLoaded(this.posts, [this.likedIds = const {}]);
+  const PostsLoaded(
+    this.posts, [
+    this.likedIds = const {},
+    this.isRefreshing = false,
+  ]);
 
   @override
-  List<Object?> get props => [posts, likedIds];
+  List<Object?> get props => [posts, likedIds, isRefreshing];
 }
 
 class PostsError extends PostsState {

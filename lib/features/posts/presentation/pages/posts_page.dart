@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:posts_demo_project/core/bloc/theme_bloc.dart';
+import 'package:posts_demo_project/core/constants/strings.dart';
 import 'package:posts_demo_project/core/injection/injection.dart';
 import 'package:posts_demo_project/core/theme.dart';
 import 'package:posts_demo_project/features/posts/data/models/posts_model.dart';
@@ -8,6 +10,8 @@ import 'package:posts_demo_project/features/posts/presentation/bloc/posts_bloc.d
 import 'package:posts_demo_project/features/posts/presentation/widgets/post_card_widget.dart';
 import 'package:posts_demo_project/core/utils/responsive_query.dart';
 import 'package:posts_demo_project/features/posts/presentation/widgets/shimmer_widget.dart';
+import 'package:posts_demo_project/core/utils/loader.dart';
+import 'dart:math' as math;
 
 class PostScreen extends StatefulWidget {
   const PostScreen({super.key});
@@ -22,10 +26,10 @@ class _PostScreenState extends State<PostScreen> {
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, themeState) {
         return BlocProvider(
-          create: (_) => getIt<PostsBloc>()..add(FetchPosts()),
+          create: (_) => getIt<PostsBloc>()..add(const FetchPosts()),
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Posts'),
+              title: const Text(postPageTitle),
               actions: [
                 IconButton(
                   icon: Icon(
@@ -44,10 +48,9 @@ class _PostScreenState extends State<PostScreen> {
                 if (state is PostsLoading) {
                   return ListView.builder(
                     padding: const EdgeInsets.all(12),
-                    itemCount: 6,
+                    itemCount: 7,
                     itemBuilder: (context, index) => const ShimmerPostCard(),
                   );
-                  // const Center(child: Loader());
                 }
                 // post loaded state:
                 if (state is PostsLoaded) {
@@ -55,39 +58,102 @@ class _PostScreenState extends State<PostScreen> {
 
                   return RefreshIndicator(
                     onRefresh: () async {
-                      context.read<PostsBloc>().add(FetchPosts());
+                      final bloc = context.read<PostsBloc>();
+                      bloc.add(const FetchPosts(useShimmer: false));
+                      // keeping the refresh indicator visible until loading completes
+                      await bloc.stream.firstWhere(
+                        (s) => s is PostsLoaded || s is PostsError,
+                      );
                     },
                     child: Center(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final screen = ScreenHelper(context);
-                          return ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: screen.maxWidth.toDouble(),
-                            ),
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(12),
-                              itemCount: posts.length,
-                              itemBuilder: (context, index) {
-                                final post = posts[index];
-                                final isLiked = state.likedIds.contains(
-                                  post.id,
-                                );
-                                return PostCard(
-                                  title: post.title,
-                                  body: post.body,
-                                  username: "Sakar Chaulagain",
-                                  imageUrl:
-                                      'https://picsum.photos/id/${post.id}/200/200',
-                                  liked: isLiked,
-                                  onLikeToggle: () {
-                                    context.read<PostsBloc>().add(
-                                      LikePost(post.id),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
+                          // responsive grid: 2 columns on desktop, 1 on mobile/tablet
+                          return Builder(
+                            builder: (context) {
+                              final screen = ScreenHelper(context);
+
+                              // cap grid max width on very large desktop monitors
+                              final maxAllowedWidth = screen.isDesktop
+                                  ? 1000.0
+                                  : screen.maxWidth;
+                              final availableWidth = math.min(
+                                constraints.maxWidth,
+                                maxAllowedWidth,
+                              );
+
+                              final columns = screen.isDesktop ? 2 : 1;
+                              const spacing = 12.0;
+                              final cardWidth =
+                                  (availableWidth - spacing * (columns + 1)) /
+                                  columns;
+
+                              final cardHeight = screen.isDesktop
+                                  ? 175.0
+                                  : screen.isTablet
+                                  ? 180.0
+                                  : 165.sp;
+
+                              final childAspectRatio = cardWidth / cardHeight;
+
+                              return Align(
+                                alignment: Alignment.topCenter,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: availableWidth,
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      GridView.builder(
+                                        padding: const EdgeInsets.all(spacing),
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: columns,
+                                              crossAxisSpacing: spacing,
+                                              mainAxisSpacing: spacing,
+                                              childAspectRatio:
+                                                  childAspectRatio,
+                                            ),
+                                        itemCount: posts.length,
+                                        itemBuilder: (context, index) {
+                                          final post = posts[index];
+                                          return PostCard(
+                                            title: post.title,
+                                            body: post.body,
+                                            username: postUsername,
+                                            imageUrl:
+                                                'https://picsum.photos/id/${post.id}/200/200',
+                                            liked: state.likedIds.contains(
+                                              post.id,
+                                            ),
+                                            onLikeToggle: () {
+                                              context.read<PostsBloc>().add(
+                                                LikePost(post.id),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                      // show an overlay loader while refreshing
+                                      if (state.isRefreshing)
+                                        Positioned.fill(
+                                          child: Container(
+                                            color: Theme.of(context)
+                                                .scaffoldBackgroundColor
+                                                // ignore: deprecated_member_use
+                                                .withOpacity(0.6),
+                                            child: const Center(
+                                              child: Loader(),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -106,7 +172,7 @@ class _PostScreenState extends State<PostScreen> {
                 }
 
                 // initial state:
-                return const Center(child: Text('No posts yet'));
+                return const Center(child: Text(postInitialMessage));
               },
             ),
           ),

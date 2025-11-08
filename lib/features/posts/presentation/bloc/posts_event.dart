@@ -4,10 +4,16 @@ abstract class PostsEvent extends Equatable {
   const PostsEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-class FetchPosts extends PostsEvent {}
+class FetchPosts extends PostsEvent {
+  final bool useShimmer;
+  const FetchPosts({this.useShimmer = true});
+
+  @override
+  List<Object?> get props => [useShimmer];
+}
 
 //  for like post event:
 class LikePost extends PostsEvent {

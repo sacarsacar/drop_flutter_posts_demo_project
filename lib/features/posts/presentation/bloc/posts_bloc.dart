@@ -18,7 +18,16 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
   }
 
   Future<void> _onFetchPosts(FetchPosts event, Emitter<PostsState> emit) async {
-    emit(PostsLoading());
+    final current = state;
+
+    if (event.useShimmer) {
+      emit(PostsLoading());
+    } else if (current is PostsLoaded) {
+      emit(PostsLoaded(current.posts, current.likedIds, true));
+    } else {
+      emit(PostsLoading());
+    }
+
     try {
       final posts = await _repository.fetchPosts();
 
@@ -34,7 +43,7 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
           }
         }
       }
-      emit(PostsLoaded(posts, likedPosts));
+      emit(PostsLoaded(posts, likedPosts, false));
     } catch (e) {
       emit(PostsError(e.toString()));
     }
@@ -58,6 +67,6 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
       updated.remove(event.postId);
     }
 
-    emit(PostsLoaded(current.posts, updated));
+    emit(PostsLoaded(current.posts, updated, current.isRefreshing));
   }
 }
