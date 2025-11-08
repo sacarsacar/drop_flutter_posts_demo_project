@@ -87,4 +87,4 @@ jobs:
             build/app/outputs/flutter-apk/app-dev-release.apk
             build/app/outputs/bundle/prodRelease/app-prod-release.aab
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN}}
