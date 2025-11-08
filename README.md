@@ -129,3 +129,5 @@ Create a `.vscode/launch.json` file with the following to run flavors from VS Co
 - Favorites are stored locally (HydratedBloc / Hive) and do not sync to a backend.
 - Dependency injection is implemented with get_it + injectable (codegen).
 - Use flutter_screenutil & MediaQuery for responsive layouts and Material 3 theming for consistent UI.
+
+![Flutter CI/CD](https://github.com/sacarsacar/drop_flutter_posts_demo_project/actions/workflows/flutter_cicd.yml/badge.svg)
