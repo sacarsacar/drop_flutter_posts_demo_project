@@ -21,6 +21,14 @@ class PostScreen extends StatefulWidget {
 }
 
 class _PostScreenState extends State<PostScreen> {
+  Widget _shimmerList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: 7,
+      itemBuilder: (context, index) => const ShimmerPostCard(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(
@@ -44,17 +52,43 @@ class _PostScreenState extends State<PostScreen> {
 
             body: BlocBuilder<PostsBloc, PostsState>(
               builder: (context, state) {
-                // loading state:
+                // loading state: show shimmer + centered loader
                 if (state is PostsLoading) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: 7,
-                    itemBuilder: (context, index) => const ShimmerPostCard(),
+                  return Stack(
+                    children: [
+                      _shimmerList(),
+                      Positioned.fill(
+                        child: Container(
+                          color: Theme.of(context).scaffoldBackgroundColor
+                              // ignore: deprecated_member_use
+                              .withOpacity(0.6),
+                          child: const Center(child: Loader()),
+                        ),
+                      ),
+                    ],
                   );
                 }
+
                 // post loaded state:
                 if (state is PostsLoaded) {
                   final List<Post> posts = state.posts;
+
+                  // if refreshing: show shimmer + loader overlay to indicate refresh
+                  if (state.isRefreshing) {
+                    return Stack(
+                      children: [
+                        _shimmerList(),
+                        Positioned.fill(
+                          child: Container(
+                            color: Theme.of(context).scaffoldBackgroundColor
+                                // ignore: deprecated_member_use
+                                .withOpacity(0.6),
+                            child: const Center(child: Loader()),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
 
                   return RefreshIndicator(
                     onRefresh: () async {
@@ -102,54 +136,34 @@ class _PostScreenState extends State<PostScreen> {
                                   constraints: BoxConstraints(
                                     maxWidth: availableWidth,
                                   ),
-                                  child: Stack(
-                                    children: [
-                                      GridView.builder(
-                                        padding: const EdgeInsets.all(spacing),
-                                        physics:
-                                            const AlwaysScrollableScrollPhysics(),
-                                        gridDelegate:
-                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: columns,
-                                              crossAxisSpacing: spacing,
-                                              mainAxisSpacing: spacing,
-                                              childAspectRatio:
-                                                  childAspectRatio,
-                                            ),
-                                        itemCount: posts.length,
-                                        itemBuilder: (context, index) {
-                                          final post = posts[index];
-                                          return PostCard(
-                                            title: post.title,
-                                            body: post.body,
-                                            username: postUsername,
-                                            imageUrl:
-                                                'https://picsum.photos/id/${post.id}/200/200',
-                                            liked: state.likedIds.contains(
-                                              post.id,
-                                            ),
-                                            onLikeToggle: () {
-                                              context.read<PostsBloc>().add(
-                                                LikePost(post.id),
-                                              );
-                                            },
+                                  child: GridView.builder(
+                                    padding: const EdgeInsets.all(spacing),
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: columns,
+                                          crossAxisSpacing: spacing,
+                                          mainAxisSpacing: spacing,
+                                          childAspectRatio: childAspectRatio,
+                                        ),
+                                    itemCount: posts.length,
+                                    itemBuilder: (context, index) {
+                                      final post = posts[index];
+                                      return PostCard(
+                                        title: post.title,
+                                        body: post.body,
+                                        username: postUsername,
+                                        imageUrl:
+                                            'https://picsum.photos/id/${post.id}/200/200',
+                                        liked: state.likedIds.contains(post.id),
+                                        onLikeToggle: () {
+                                          context.read<PostsBloc>().add(
+                                            LikePost(post.id),
                                           );
                                         },
-                                      ),
-                                      // show an overlay loader while refreshing
-                                      if (state.isRefreshing)
-                                        Positioned.fill(
-                                          child: Container(
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor
-                                                // ignore: deprecated_member_use
-                                                .withOpacity(0.6),
-                                            child: const Center(
-                                              child: Loader(),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
+                                      );
+                                    },
                                   ),
                                 ),
                               );

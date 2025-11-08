@@ -29,6 +29,9 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
     }
 
     try {
+      //  simulating network delay to show shimmer effect properly
+      await Future.delayed(const Duration(milliseconds: 300));
+
       final posts = await _repository.fetchPosts();
 
       // Load likes from Hive box:
