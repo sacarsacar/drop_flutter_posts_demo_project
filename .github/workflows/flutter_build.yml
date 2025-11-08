@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # Required to upload release assets
+  contents: write
 
 jobs:
   build:
@@ -18,12 +18,14 @@ jobs:
       # 1️⃣ Checkout source code
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 2️⃣ Setup Flutter SDK
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.35.7" # Adjust to your version
+          flutter-version: "3.35.7"
 
       # 3️⃣ Cache Flutter dependencies
       - name: Cache Flutter dependencies
@@ -34,7 +36,7 @@ jobs:
             build/
           key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.yaml') }}
 
-      # 4️⃣ Create .env file (for BaseUrl or API)
+      # 4️⃣ Create .env file
       - name: Create environment file
         run: echo "BaseUrl=https://jsonplaceholder.typicode.com/posts" > .env
 
@@ -42,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 6️⃣ Run code generation (if using build_runner)
+      # 6️⃣ Run code generation
       - name: Run build_runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -50,15 +52,15 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
-      # 8️⃣ Build Dev APK (unsigned)
+      # 8️⃣ Build Dev APK
       - name: Build Dev APK
         run: flutter build apk --flavor dev --dart-define=FLAVOR=dev
 
-      # 9️⃣ Build Prod AAB (unsigned)
+      # 9️⃣ Build Prod AAB
       - name: Build Prod AAB
         run: flutter build appbundle --flavor prod --dart-define=FLAVOR=prod
 
-      # 🔟 Upload Artifacts (to Actions tab)
+      # 🔟 Upload Artifacts
       - name: Upload Dev APK
         uses: actions/upload-artifact@v4
         with:
@@ -71,21 +73,62 @@ jobs:
           name: flutter-prod-aab
           path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
 
-      # 1️⃣1️⃣ Get version and create tag (optional, safe to keep)
-      - name: Get version and create tag
+      # 1️⃣1️⃣ Auto-increment patch version & build number
+      - name: Auto-increment version & build
+        id: version_tag
         run: |
-          VERSION=$(grep 'version:' pubspec.yaml | awk '{print $2}')
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git tag v$VERSION
-          git push origin v$VERSION
+          # Extract current version (e.g., 1.0.3+5)
+          CURRENT_VERSION=$(grep 'version:' pubspec.yaml | awk '{print $2}')
+          VERSION_PART=$(echo $CURRENT_VERSION | cut -d'+' -f1)
+          BUILD_NUMBER=$(echo $CURRENT_VERSION | cut -d'+' -f2)
 
-      # 1️⃣2️⃣ Upload to GitHub Release (runs on main branch push)
+          echo "Current version: $VERSION_PART, build: $BUILD_NUMBER"
+
+          # Split version into major, minor, patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_PART"
+          PATCH=$((PATCH + 1))
+          BUILD_NUMBER=$((BUILD_NUMBER + 1))
+
+          # New version
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH+$BUILD_NUMBER"
+          echo "New version: $NEW_VERSION"
+
+          # Update pubspec.yaml
+          sed -i "s/version: .*/version: $NEW_VERSION/" pubspec.yaml
+
+          # Commit updated pubspec.yaml
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add pubspec.yaml
+          git commit -m "ci: bump version to $NEW_VERSION"
+
+          # Tag and push
+          TAG="v$MAJOR.$MINOR.$PATCH"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Skipping tag creation."
+          else
+            git tag $TAG
+            git push origin main --tags
+          fi
+
+          # Set environment variables for release
+          echo "VERSION=$TAG" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+
+      # 1️⃣2️⃣ Upload to GitHub Release
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.VERSION }}
+          name: "Flutter Release ${{ env.VERSION }}"
+          body: |
+            🚀 Automated release
+            ✅ Version: ${{ env.VERSION }}
+            ✅ Build number: ${{ env.BUILD_NUMBER }}
+            ✅ Built from latest commit on main branch.
           files: |
             build/app/outputs/flutter-apk/app-dev-release.apk
             build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
