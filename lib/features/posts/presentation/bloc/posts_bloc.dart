@@ -30,7 +30,7 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
 
     try {
       //  simulating network delay to show shimmer effect properly
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 800));
 
       final posts = await _repository.fetchPosts();
 
