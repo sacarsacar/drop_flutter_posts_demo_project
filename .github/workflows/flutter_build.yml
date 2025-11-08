@@ -5,11 +5,9 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
-  release:
-    types: [created]
 
 permissions:
-  contents: write # To upload release assets
+  contents: write # Required to upload release assets
 
 jobs:
   build:
@@ -25,9 +23,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.35.7" # adjust to your version
+          flutter-version: "3.35.7" # Adjust to your version
 
-      # 3️⃣ Cache pub dependencies
+      # 3️⃣ Cache Flutter dependencies
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
         with:
@@ -36,16 +34,15 @@ jobs:
             build/
           key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.yaml') }}
 
-      # 4️⃣ Create .env file (for BaseUrl)
+      # 4️⃣ Create .env file (for BaseUrl or API)
       - name: Create environment file
-        run: |
-          echo "BaseUrl=https://jsonplaceholder.typicode.com/posts" > .env
+        run: echo "BaseUrl=https://jsonplaceholder.typicode.com/posts" > .env
 
       # 5️⃣ Install dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # 6️⃣ Run code generation
+      # 6️⃣ Run code generation (if using build_runner)
       - name: Run build_runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -53,19 +50,15 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
-      # 8️⃣ Run tests (if any)
-      - name: Run tests
-        run: flutter test || true
-
-      # 9️⃣ Build dev APK (unsigned)
+      # 8️⃣ Build Dev APK (unsigned)
       - name: Build Dev APK
         run: flutter build apk --flavor dev --dart-define=FLAVOR=dev
 
-      # 🔟 Build prod AAB (unsigned)
+      # 9️⃣ Build Prod AAB (unsigned)
       - name: Build Prod AAB
         run: flutter build appbundle --flavor prod --dart-define=FLAVOR=prod
 
-      # 1️⃣1️⃣ Upload Artifacts (to Actions tab)
+      # 🔟 Upload Artifacts (to Actions tab)
       - name: Upload Dev APK
         uses: actions/upload-artifact@v4
         with:
@@ -78,13 +71,21 @@ jobs:
           name: flutter-prod-aab
           path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
 
-      # 1️⃣2️⃣ Upload to GitHub Release (only when a new release tag is created)
+      # 1️⃣1️⃣ Get version and create tag (optional, safe to keep)
+      - name: Get version and create tag
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | awk '{print $2}')
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag v$VERSION
+          git push origin v$VERSION
+
+      # 1️⃣2️⃣ Upload to GitHub Release (runs on main branch push)
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
-        # if: startsWith(github.ref, 'refs/tags/') 
         with:
           files: |
             build/app/outputs/flutter-apk/app-dev-release.apk
             build/app/outputs/bundle/prodRelease/app-prod-release.aab
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
