@@ -38,7 +38,7 @@ class PostCard extends StatelessWidget {
 
         return Card(
           elevation: 1,
-          margin: const EdgeInsets.only(bottom: 10),
+          margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
@@ -141,7 +141,7 @@ class PostCard extends StatelessWidget {
                               ),
                               constraints: BoxConstraints(
                                 minWidth: 40,
-                                minHeight: 40,
+                                minHeight: 0,
                               ),
                               icon: Icon(
                                 liked ? Icons.favorite : Icons.favorite_border,
